@@ -1,0 +1,60 @@
+[project]
+name = "kimi-agent-custom-commands"
+version = "0.1.0"
+description = "Guild-scoped custom slash commands for Kimi"
+requires-python = ">=3.14"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "webhead2oo9" }]
+keywords = ["discord", "discord-bot", "kimi-agent", "module", "slash-commands"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = ["kimi-agent-module-api>=1.2,<2"]
+
+[project.optional-dependencies]
+dev = [
+    "kimi-agent-module-api[testing]>=1.2,<2",
+    "mypy",
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+    "twine",
+]
+
+[project.entry-points."kimi_agent.modules"]
+custom_commands = "kimi_agent_custom_commands:SPEC"
+
+[project.urls]
+Documentation = "https://github.com/webhead2oo9/kimi-agent-custom-commands#readme"
+Issues = "https://github.com/webhead2oo9/kimi-agent-custom-commands/issues"
+Repository = "https://github.com/webhead2oo9/kimi-agent-custom-commands"
+
+[build-system]
+requires = ["setuptools>=84"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+kimi_agent_custom_commands = ["py.typed"]
+
+[tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src:$MYPY_CONFIG_FILE_DIR/tests"
+explicit_package_bases = true
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100

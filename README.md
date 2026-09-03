@@ -1,91 +1,114 @@
 # Kimi Custom Commands
 
-A standalone [Kimi](https://github.com/webhead2oo9/kimi-agent) module for guild-scoped custom
-slash commands. Staff edit commands through ephemeral Discord controls and modals; members invoke
-the resulting commands normally. Content is stored in module-owned SQLite tables and command
-registrations update without restarting the bot.
+This module lets the staff of a Discord server create their own slash commands
+for [Kimi](https://github.com/webhead2oo9/kimi-agent) without writing code. Staff
+build a command in a small editor inside Discord. Members then use it like any
+other slash command. New commands appear without restarting the bot.
 
-## Requirements
+Each server's commands are private to that server. Two servers can use the same
+command name without seeing each other's content.
 
-- Python 3.14+
-- A Kimi host that provides the required capabilities below
-- `kimi-agent-module-api>=1.2,<2`, provided by Kimi's environment
-- Host capabilities `discord.guild_commands.v1`, `discord.modals.v1`, and
-  `discord.components_v2.v1`
+## What staff and members get
 
-The package does not use Kimi's raw bot or raw database ports.
+Staff use the `/custom-command` group:
 
-## Install and activate
+- **create** starts a new command from a name and description.
+- **edit** opens an existing command. Names autocomplete.
+- **delete** removes a command.
+- **list** shows every command and its revision number.
 
-Clone this repository next to Kimi and check out the reviewed tag or exact commit you want to
-run:
+The editor works in pages and blocks. A block can be a heading, paragraph, field,
+divider, image gallery, or small text. Blocks and pages can be added, edited,
+reordered, and deleted. Save refuses to overwrite a version someone else saved in the
+meantime. Discard reloads the saved version. An open editor times out after 30
+minutes of inactivity, and only the staff member who opened it can use it.
 
-```console
-git clone https://github.com/webhead2oo9/kimi-agent-custom-commands.git /path/to/kimi-agent-custom-commands
-git -C /path/to/kimi-agent-custom-commands checkout --detach <reviewed-tag-or-commit>
-```
+Members run a saved command as `/name`. The response is public unless they add
+`hidden:true`, which shows it only to them. Commands with several pages include a
+page selector. Responses never ping anyone.
 
-Then run this from Kimi's `bot/` directory. `--no-deps` keeps Kimi's reviewed module API and other
-host dependencies authoritative:
+Kimi's AI can also read commands and suggest changes when a staff member asks it
+to. A suggestion is never saved on its own. The module posts an Approve/Reject card
+in the channel, with a preview of the current and proposed versions. Any staff
+member in that server can decide, including the person who asked for it.
 
-```console
-uv pip install --python .venv/bin/python --no-deps --editable /path/to/kimi-agent-custom-commands
-```
+## Before you install
 
-Then add the module entry-point name to the comma-separated `KIMI_MODULES` value in Kimi's
-dotenv, preserving any modules already enabled:
+You need:
 
-```dotenv
-KIMI_MODULES=custom_commands
-```
+- A running Kimi with Python 3.14 or newer.
+- A Kimi version that provides guild commands, modals, and components v2. If it
+  does not, the module stays off and says so in `/modules status`.
+- The bot's ordinary permission to use application commands, plus permission to
+  send messages in channels where staff ask the AI for a proposal.
 
-For example, `KIMI_MODULES=moderation` becomes
-`KIMI_MODULES=moderation,custom_commands`. The module has no guild settings file and requires no
-privileged gateway intents. The bot needs the ordinary permission to use application commands and
-to send messages in channels where staff ask the AI to create a review card.
+No privileged intents are required.
 
-Restart Kimi after installing and enabling the module. Then verify that:
+## Install
 
-1. Startup logs show `Kimi module started: custom_commands <version>`.
-2. `/modules status` reports `custom_commands` as healthy in the target server.
-3. Staff can run `/custom-command create`, while members cannot use the management group.
-4. A saved test command appears and can be invoked by a member without another restart.
+1. Clone this repository next to Kimi and check out the tag or commit you want to
+   run:
 
-A later `uv sync` of the Kimi checkout may remove an independently installed module; if so,
-install it again.
+   ```console
+   git clone https://github.com/webhead2oo9/kimi-agent-custom-commands.git /path/to/kimi-agent-custom-commands
+   git -C /path/to/kimi-agent-custom-commands checkout --detach <tag-or-commit>
+   ```
 
-## Guild scope and access
+2. From Kimi's `bot/` directory, install the module into Kimi's own Python
+   environment. The `--no-deps` flag keeps Kimi's already-installed dependencies
+   in charge:
 
-`KIMI_MODULES=custom_commands` loads the module into the Kimi process; it does not select one
-server. The module follows Kimi's active-guild configuration. A guild must be approved through
-`ALLOWED_GUILD_IDS` or through `<CONFIG_DIR>/servers/<guild_id>.md` with `bot_active: true`. An
-explicit `bot_active: false` disables the bot there. The module has no separate
-`guild-modules/<guild_id>/custom_commands.md` settings file, so it is available independently in
-every guild where Kimi is active.
+   ```console
+   uv pip install --python .venv/bin/python --no-deps --editable /path/to/kimi-agent-custom-commands
+   ```
 
-The module never accepts a guild ID from a user or the model. It derives the scope from the trusted
-Discord interaction or server conversation:
+3. Add `custom_commands` to the `KIMI_MODULES` line in Kimi's environment file.
+   Keep whatever is already there, separated by commas:
 
-| Surface | Guild used | Who can use it |
-|---|---|---|
-| `/custom-command create`, `edit`, `delete`, and `list` | The guild where the slash command was invoked | Kimi staff only |
-| AI read/propose tools | The current server conversation's guild | Kimi staff only |
-| Proposal previews, Approve, and Reject | The proposal's guild; cross-guild controls are rejected | Any current Kimi staff member in that guild, including the proposer |
-| A generated `/name` command | Only the guild in which it was saved | Any member of that active guild |
+   ```dotenv
+   KIMI_MODULES=moderation,custom_commands
+   ```
 
-`/custom-command` is synchronized as a global management group so it exists before a server has
-any generated commands. Its handlers still reject DMs, inactive guilds, and non-staff users.
-Discord may therefore show the group to a non-staff member, but attempting to use it returns an
-ephemeral `Staff only.` response. Discord's own integration command permissions may hide or further
-restrict commands, but cannot bypass Kimi's runtime trust check.
-Generated commands are registered with Discord only for their owning guild. Their records,
-editor sessions, proposals, autocomplete, and command synchronization are also keyed by that guild,
-so two guilds may define the same command name without sharing content. An editor session is
-additionally bound to the staff member who opened it; another staff member cannot take it over.
+4. Restart Kimi.
 
-"Staff" means Kimi's resolved `staff` trust tier, not Discord Administrator permission by itself.
-Configure it globally with `STAFF_USER_IDS` or `STAFF_ROLE_IDS`, or add guild-local staff in the
-server file:
+Then confirm it is working:
+
+- The startup log contains `Kimi module started: custom_commands <version>`.
+- `/modules status` shows `custom_commands` as healthy in the server.
+- A staff member can run `/custom-command create`. A regular member gets
+  "Staff only."
+- A saved test command can be run by a member straight away.
+
+If you later run `uv sync` in the Kimi checkout, it may uninstall this module. Run
+the install command again if that happens.
+
+## Which servers get it
+
+The module is available in every server where Kimi itself is active. There is no
+separate per-server settings file for it. A server is active when it is listed in
+`ALLOWED_GUILD_IDS`, or when its server file at
+`<CONFIG_DIR>/servers/<guild_id>.md` says `bot_active: true`.
+
+The module always works out which server it is in from the Discord interaction
+itself. It never accepts a server ID typed by a user or suggested by the AI.
+
+| Action | Who can do it |
+|---|---|
+| `/custom-command` create, edit, delete, list | Kimi staff in that server |
+| Ask the AI to read or propose commands | Kimi staff in that server |
+| Approve or reject a proposal | Any Kimi staff member in that server |
+| Run a saved `/name` command | Any member of that server |
+
+Discord may show the `/custom-command` group to everyone, because it is registered
+globally so it exists before a server has any commands. Non-staff users who try it
+get a private "Staff only." reply. Discord's own command permission settings can
+hide it further but cannot grant access.
+
+## Who counts as staff
+
+"Staff" means Kimi's staff trust tier, not the Discord Administrator permission.
+Set it globally with `STAFF_USER_IDS` or `STAFF_ROLE_IDS` in the environment file,
+or add staff for one server at the top of its server file:
 
 ```yaml
 ---
@@ -95,61 +118,39 @@ staff_role_ids: [234567890123456789]
 ---
 ```
 
-Guild-local lists are additive to the global lists. Guild-local trust-list changes are read on the
-next interaction; changes to global dotenv settings require a restart. `OWNER_USER_ID` alone does
-not grant the guild `staff` tier.
-
-## Staff commands
-
-- `/custom-command create name description` opens a new draft.
-- `/custom-command edit name` opens an existing command, with autocomplete.
-- `/custom-command delete name` deletes and republishes the guild command set.
-- `/custom-command list` shows names and revisions.
-
-The editor supports pages and heading, text, field, divider, image-gallery, and small-text blocks.
-Pages and blocks can be selected, added, edited, reordered, and deleted. Save uses optimistic
-revision checking; Discard reloads the stored command; Close drops the in-memory draft. Sessions
-expire after 30 minutes.
-
-Every generated command has an optional `hidden` argument. The default response is public;
-`hidden:true` makes it ephemeral. Multi-page responses include a page selector. Mentions are
-disabled by the module interaction adapter.
-
-## AI proposals
-
-Two staff-only searchable tools are registered:
-
-- `custom_commands_read` searches or reads stored definitions.
-- `custom_commands_propose` proposes a complete create, replace/rename, or delete operation.
-
-AI proposals never save directly. The module posts an Approve/Reject review card in the invoking
-channel. Approval atomically compares the recorded revision, changes the command, and decides the
-proposal before publishing Discord registrations. The requesting staff member may approve their
-own proposal. Staff can preview both the current and proposed rich output, including every page,
-before deciding.
+Server-file lists add to the global lists. Changes to a server file are picked up
+on the next interaction. Changes to the environment file need a restart. Being the
+`OWNER_USER_ID` does not by itself make someone staff in a server.
 
 ## Data and privacy
 
-The module does not subscribe to message or member events, read channel history, call external
-HTTP services, or send custom-command content to the model on its own. It receives slash-command,
-button, select, and modal values only when someone uses its controls. Image and thumbnail URLs are
-stored as text and rendered by Discord; the module does not download them.
+The module does not read messages, watch members, look at channel history, call
+any outside service, or send command content to the AI unless a staff member asks.
+It only receives the values people type into its own controls. Image and thumbnail
+URLs are stored as text and shown by Discord. The module never downloads them.
 
-It owns two tables in Kimi's shared SQLite database:
+It keeps two tables in Kimi's shared database:
 
-| Table | Stored data | Retention |
+| Table | What it holds | How long |
 |---|---|---|
-| `custom_commands_commands` | Server ID, stable command ID, name, description, versioned page/block JSON, revision, creator/updater user IDs, and timestamps | Until staff delete the command or an operator deletes the module data |
-| `custom_commands_proposals` | Server and proposal IDs, target command/revision, proposed content, state, proposer/decider user IDs, summary, decision reason, and timestamps | Retained as a review history until an operator deletes the module data |
+| `custom_commands_commands` | Server ID, command ID, name, description, page and block content, revision, who created and last edited it, timestamps | Until staff delete the command or an operator removes the table |
+| `custom_commands_proposals` | Server and proposal IDs, target command, proposed content, state, who proposed and decided it, summary, reason, timestamps | Kept as history until an operator removes the table |
 
-Editor drafts exist only in bot memory and expire after 30 minutes. Restarting the bot discards
-open drafts but not saved commands or proposals. Removing the package does not automatically delete
-its database tables.
+Open editors live only in memory. Restarting Kimi discards unsaved edits but not
+saved commands or proposals. Uninstalling the module does not delete its tables.
 
-The module declares only the `send_message` Discord action, used to post AI proposal review cards.
-It declares no event subscriptions or outbound network hosts.
+The only Discord action the module uses is sending a message, for the proposal
+card. It does not subscribe to any events or talk to any outside hosts.
 
-## Development
+## Updating
+
+Releases are Git tags. There is no PyPI package. To move to a new version, check
+out the new tag in your clone and run the install command from step 2 again. The
+tag's version always matches the one in `pyproject.toml`.
+
+## For developers
+
+You only need this if you are changing the module's code.
 
 ```shell
 uv sync --locked --extra dev
@@ -160,15 +161,9 @@ uv run python -m pytest -q
 uv build --no-sources
 ```
 
-The checked-in lock file resolves a compatible module API from PyPI. CI requires that lock so
-tests, builds, and dependency audits use the same dependency set as local development.
-
-## Versioning
-
-This module is distributed from this Git repository, not PyPI. Releases are Git tags whose version
-matches `pyproject.toml`. CI tests the module and validates its wheel and source distribution, but
-does not publish them. Operators should review a tag or exact commit, check it out, and reinstall
-the editable package when changing versions.
+The lock file pulls `kimi-agent-module-api` from PyPI so tests run without a Kimi
+checkout. CI runs the same commands and checks the built package but does not
+publish it.
 
 ## License
 

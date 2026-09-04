@@ -7,7 +7,7 @@ from kimi_agent_module_api.trust import TrustTier
 
 from kimi_agent_custom_commands.module import MODULE_NAME, CustomCommandsModule
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 _BLOCK_SCHEMA = {
     "oneOf": [
@@ -163,6 +163,7 @@ SPEC = ModuleSpec(
     name=MODULE_NAME,
     version=VERSION,
     create=create,
+    api_version=2,
     requires_capabilities=(
         "discord.guild_commands.v1",
         "discord.modals.v1",

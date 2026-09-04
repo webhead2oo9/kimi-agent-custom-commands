@@ -1,6 +1,6 @@
 [project]
 name = "kimi-agent-custom-commands"
-version = "0.1.0"
+version = "0.2.0"
 description = "Guild-scoped custom slash commands for Kimi"
 requires-python = ">=3.14"
 readme = "README.md"
@@ -15,11 +15,11 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Typing :: Typed",
 ]
-dependencies = ["kimi-agent-module-api>=1.2,<2"]
+dependencies = ["kimi-agent-module-api>=2,<3"]
 
 [project.optional-dependencies]
 dev = [
-    "kimi-agent-module-api[testing]>=1.2,<2",
+    "kimi-agent-module-api[testing]>=2,<3",
     "mypy",
     "pytest",
     "pytest-asyncio",

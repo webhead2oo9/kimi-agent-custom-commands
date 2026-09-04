@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from functools import partial
+
 import pytest
 from conftest import CHANNEL, GUILD, STAFF, Harness
 from kimi_agent_module_api import ModuleToolContext
 from kimi_agent_module_api.contracts import ButtonSpec, LayoutText
-from kimi_agent_module_api.testing import FakeInteraction, load_context
+from kimi_agent_module_api.testing import FakeInteraction as _FakeInteraction
+from kimi_agent_module_api.testing import load_context
 from kimi_agent_module_api.trust import TrustTier
 
 from kimi_agent_custom_commands.editor import SessionStore, block_modal, editor_components
@@ -17,6 +20,8 @@ from kimi_agent_custom_commands.models import (
 )
 from kimi_agent_custom_commands.spec import SPEC
 from kimi_agent_custom_commands.store import CommandStore
+
+FakeInteraction = partial(_FakeInteraction, module_name=SPEC.name)
 
 pytestmark = pytest.mark.asyncio
 

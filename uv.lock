@@ -369,7 +369,7 @@ wheels = [
 
 [[package]]
 name = "kimi-agent-custom-commands"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "kimi-agent-module-api" },
@@ -387,8 +387,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "kimi-agent-module-api", specifier = ">=1.2,<2" },
-    { name = "kimi-agent-module-api", extras = ["testing"], marker = "extra == 'dev'", specifier = ">=1.2,<2" },
+    { name = "kimi-agent-module-api", specifier = ">=2,<3" },
+    { name = "kimi-agent-module-api", extras = ["testing"], marker = "extra == 'dev'", specifier = ">=2,<3" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'dev'" },
@@ -399,14 +399,14 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "kimi-agent-module-api"
-version = "1.2.0"
+version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic-settings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/34/71/08214a6d92eb3403192f82af99b2c1f5968b8ff41240a4f7baad53bb4dc9/kimi_agent_module_api-1.2.0.tar.gz", hash = "sha256:3abf3119feabc0df7b16727787d7976c89fc6f6ed6063e032e49e53286832d71", size = 28567, upload-time = "2026-08-30T07:22:38.437Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/e1/661a5a877e34b549699fcaff674ea5e593be329d1bf38afba5ba8e5625e9/kimi_agent_module_api-2.0.0.tar.gz", hash = "sha256:843cf39ce2aa264f8102a6aa7dc8f976d20d6b9dcfb61856f935761b89fab2c5", size = 37781, upload-time = "2026-09-04T13:02:23.426Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/61/8e5d31a1c151cc4d9433fe08f056ef98b21c081a620a313e8c9493397059/kimi_agent_module_api-1.2.0-py3-none-any.whl", hash = "sha256:665f07a7922559b9d98a4227dc71d218f802242286ec7de243206fd1772b2259", size = 30848, upload-time = "2026-08-30T07:22:37.625Z" },
+    { url = "https://files.pythonhosted.org/packages/df/91/3a33e45cf50185dd8cdc61c4f9e851113fc68952bcc41dfe2da1c07bcea9/kimi_agent_module_api-2.0.0-py3-none-any.whl", hash = "sha256:8dc8103ffc762fbbc9d2b14abe0ac951882fd59762eeaee0156523b54bd03080", size = 35620, upload-time = "2026-09-04T13:02:22.226Z" },
 ]
 
 [package.optional-dependencies]

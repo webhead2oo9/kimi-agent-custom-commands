@@ -37,8 +37,9 @@ member in that server can decide, including the person who asked for it.
 You need:
 
 - A running Kimi with Python 3.14 or newer.
-- A Kimi version that provides guild commands, modals, and components v2. If it
-  does not, the module stays off and says so in `/modules status`.
+- A Kimi version that provides module API version 2, guild commands, modals, and
+  components v2. If it does not, the module stays off and says so in
+  `/modules status`.
 - The bot's ordinary permission to use application commands, plus permission to
   send messages in channels where staff ask the AI for a proposal.
 
